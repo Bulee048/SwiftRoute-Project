@@ -1,14 +1,79 @@
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { DollarSign, Package, Truck, Users } from 'lucide-react'
 import StatCard from '../../components/dashboard/StatCard.jsx'
 import Page from '../../components/common/Page.jsx'
 import useSocket from '../../hooks/useSocket'
 import AdminDriversMap from '../../components/maps/AdminDriversMap.jsx'
+import { getDrivers, getAvailableDrivers } from '../../api/driverAPI'
+import { getShipments } from '../../api/shipmentAPI'
+import { getOrders } from '../../api/orderAPI'
+import { getPaymentOverview } from '../../api/paymentAPI'
+import { SHIPMENT_STATUSES } from '../../constants/statuses.js'
 
 export default function AdminDashboard() {
   const socket = useSocket()
   const [events, setEvents] = useState([])
   const [drivers, setDrivers] = useState([])
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    activeShipments: 0,
+    revenue: 0,
+    activeDrivers: 0,
+  })
+
+  useEffect(() => {
+    let mounted = true
+    async function run() {
+      try {
+        const [ordersRes, shipmentsRes, deliveredRes, failedRes, driversRes, availableDriversRes, paymentsRes] =
+          await Promise.all([
+            getOrders({ page: 1, limit: 1 }),
+            getShipments({ page: 1, limit: 5 }),
+            getShipments({ page: 1, limit: 1, status: SHIPMENT_STATUSES.DELIVERED }),
+            getShipments({ page: 1, limit: 1, status: SHIPMENT_STATUSES.FAILED_DELIVERY }),
+            getDrivers({ page: 1, limit: 1 }),
+            getAvailableDrivers({ page: 1, limit: 50 }),
+            getPaymentOverview(),
+          ])
+
+        if (!mounted) return
+
+        const totalOrders = ordersRes?.pagination?.total || 0
+        const totalShipments = shipmentsRes?.pagination?.total || 0
+        const deliveredTotal = deliveredRes?.pagination?.total || 0
+        const failedTotal = failedRes?.pagination?.total || 0
+
+        const activeShipments = Math.max(0, totalShipments - deliveredTotal - failedTotal)
+        const activeDrivers = driversRes?.pagination?.total || 0
+        const revenue = paymentsRes?.data?.revenue || paymentsRes?.data?.revenue || 0
+
+        setStats({
+          totalOrders,
+          activeShipments,
+          revenue,
+          activeDrivers,
+        })
+
+        const recentShipments = shipmentsRes?.data?.shipments || []
+        setEvents(
+          recentShipments.slice(0, 5).map((s) => ({
+            type: 'shipment_status',
+            at: s.createdAt ? new Date(s.createdAt).toISOString() : new Date().toISOString(),
+            data: { shipmentId: s._id, status: s.status },
+          })),
+        )
+
+        setDrivers(availableDriversRes?.data?.drivers || [])
+      } catch (err) {
+        toast.error(err?.response?.data?.message || 'Failed to load dashboard')
+      }
+    }
+    run()
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!socket) return
@@ -50,10 +115,17 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Total Orders (today)" value="128" change="+12.4%" changeType="up" icon={Package} color="#0EA5E9" />
-        <StatCard title="Active Shipments" value="43" change="-3.1%" changeType="down" icon={Truck} color="#F97316" />
-        <StatCard title="Revenue (month)" value="LKR 2.4M" change="+8.7%" changeType="up" icon={DollarSign} color="#22C55E" />
-        <StatCard title="Active Drivers" value="19" change="+2" changeType="up" icon={Users} color="#A855F7" />
+        <StatCard title="Total Orders" value={String(stats.totalOrders)} change="+0.0%" changeType="up" icon={Package} color="#0EA5E9" />
+        <StatCard title="Active Shipments" value={String(stats.activeShipments)} change="+0.0%" changeType="up" icon={Truck} color="#F97316" />
+        <StatCard
+          title="Revenue"
+          value={typeof stats.revenue === 'number' ? `LKR ${Math.round(stats.revenue).toLocaleString()}` : String(stats.revenue)}
+          change="+0.0%"
+          changeType="up"
+          icon={DollarSign}
+          color="#22C55E"
+        />
+        <StatCard title="Active Drivers" value={String(stats.activeDrivers)} change="+0.0%" changeType="up" icon={Users} color="#A855F7" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

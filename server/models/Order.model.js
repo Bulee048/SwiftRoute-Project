@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { generateOrderId } from '../utils/generateIds.js'
+import { ORDER_STATUSES, PAYMENT_STATUSES } from '../constants/statuses.js'
 
 const addressSchema = new mongoose.Schema(
   {
@@ -49,24 +50,12 @@ const orderSchema = new mongoose.Schema(
     priority: { type: String, enum: ['standard', 'express', 'same_day'], default: 'standard' },
     status: {
       type: String,
-      enum: [
-        'draft',
-        'placed',
-        'confirmed',
-        'pickup_scheduled',
-        'picked_up',
-        'in_transit',
-        'out_for_delivery',
-        'delivered',
-        'failed',
-        'cancelled',
-        'returned',
-      ],
-      default: 'draft',
+      enum: Object.values(ORDER_STATUSES),
+      default: ORDER_STATUSES.DRAFT,
       index: true,
     },
     shipment: { type: mongoose.Schema.Types.ObjectId, ref: 'Shipment', default: null },
-    paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
+    paymentStatus: { type: String, enum: Object.values(PAYMENT_STATUSES), default: PAYMENT_STATUSES.PENDING },
     amount: {
       subtotal: Number,
       tax: Number,

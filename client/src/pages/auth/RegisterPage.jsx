@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import Button from '../../components/common/Button.jsx'
 import { register as registerRequest } from '../../api/authAPI'
+import { ROLES } from '../../constants/roles.js'
 import useAuthStore from '../../store/authStore'
 import Page from '../../components/common/Page.jsx'
 
@@ -12,7 +13,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('Super Admin')
   const [email, setEmail] = useState('admin@swiftroute.com')
   const [password, setPassword] = useState('Admin@123')
-  const [role, setRole] = useState('admin')
+  const [role, setRole] = useState(ROLES.ADMIN)
   const [loading, setLoading] = useState(false)
 
   const onSubmit = async (e) => {
@@ -23,7 +24,7 @@ export default function RegisterPage() {
       setUser(data.data.user)
       setAccessToken(data.data.accessToken)
       toast.success('Account created')
-      navigate(role === 'admin' ? '/admin' : role === 'merchant' ? '/merchant' : '/driver')
+      navigate(role === ROLES.ADMIN ? '/admin' : role === ROLES.MERCHANT ? '/merchant' : '/driver')
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Register failed')
     } finally {
@@ -70,10 +71,10 @@ export default function RegisterPage() {
             onChange={(e) => setRole(e.target.value)}
             className="w-full rounded-xl border border-dark-border bg-dark-elevated/50 px-3 py-2.5 text-sm text-text-primary outline-none focus:ring-2 focus:ring-brand-secondary/60"
           >
-            <option value="admin">admin</option>
-            <option value="merchant">merchant</option>
-            <option value="driver">driver</option>
-            <option value="customer">customer</option>
+            <option value={ROLES.ADMIN}>admin</option>
+            <option value={ROLES.MERCHANT}>merchant</option>
+            <option value={ROLES.DRIVER}>driver</option>
+            <option value={ROLES.CUSTOMER}>customer</option>
           </select>
         </div>
 

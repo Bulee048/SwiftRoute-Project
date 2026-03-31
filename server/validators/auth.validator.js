@@ -1,11 +1,12 @@
 import { body } from 'express-validator'
+import { ROLES } from '../constants/roles.js'
 
 export const registerValidator = [
   body('name').isString().trim().notEmpty().withMessage('name is required'),
   body('email').isEmail().normalizeEmail().withMessage('valid email required'),
   body('password').isString().isLength({ min: 8 }).withMessage('password min 8 chars'),
   body('phone').optional().isString(),
-  body('role').optional().isIn(['admin', 'merchant', 'driver', 'customer']),
+  body('role').optional().isIn(Object.values(ROLES)),
 ]
 
 export const loginValidator = [

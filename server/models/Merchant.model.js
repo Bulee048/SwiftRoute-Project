@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { MERCHANT_CONTRACT_STATUSES } from '../constants/statuses.js'
 
 const addressSchema = new mongoose.Schema(
   {
@@ -41,7 +42,11 @@ const merchantSchema = new mongoose.Schema(
     },
     totalOrders: { type: Number, default: 0 },
     totalRevenue: { type: Number, default: 0 },
-    contractStatus: { type: String, enum: ['pending', 'active', 'suspended'], default: 'pending' },
+    contractStatus: {
+      type: String,
+      enum: Object.values(MERCHANT_CONTRACT_STATUSES),
+      default: MERCHANT_CONTRACT_STATUSES.PENDING,
+    },
     assignedAdmin: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     documents: { type: [documentSchema], default: [] },
   },

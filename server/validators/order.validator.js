@@ -1,4 +1,5 @@
 import { body } from 'express-validator'
+import { ORDER_STATUSES } from '../constants/statuses.js'
 
 export const createOrderValidator = [
   body('merchant').isMongoId(),
@@ -10,34 +11,10 @@ export const updateOrderValidator = [
   body('priority').optional().isIn(['standard', 'express', 'same_day']),
   body('status')
     .optional()
-    .isIn([
-      'draft',
-      'placed',
-      'confirmed',
-      'pickup_scheduled',
-      'picked_up',
-      'in_transit',
-      'out_for_delivery',
-      'delivered',
-      'failed',
-      'cancelled',
-      'returned',
-    ]),
+    .isIn(Object.values(ORDER_STATUSES)),
 ]
 
 export const setOrderStatusValidator = [
-  body('status').isIn([
-    'draft',
-    'placed',
-    'confirmed',
-    'pickup_scheduled',
-    'picked_up',
-    'in_transit',
-    'out_for_delivery',
-    'delivered',
-    'failed',
-    'cancelled',
-    'returned',
-  ]),
+  body('status').isIn(Object.values(ORDER_STATUSES)),
 ]
 

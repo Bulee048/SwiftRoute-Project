@@ -13,7 +13,7 @@ const useAuthStore = create(
     }),
     {
       name: 'swiftroute-auth',
-      partialize: (state) => ({ user: state.user, accessToken: state.accessToken }),
+      partialize: (state) => ({ user: state.user, accessToken: state.accessToken, isAuthenticated: state.isAuthenticated }),
     },
   ),
 )

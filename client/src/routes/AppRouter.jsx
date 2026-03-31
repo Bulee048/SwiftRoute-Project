@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute.jsx'
+import { ROLES } from '../constants/roles.js'
 
 import AdminLayout from '../layouts/AdminLayout.jsx'
 import MerchantLayout from '../layouts/MerchantLayout.jsx'
@@ -58,7 +59,7 @@ export default function AppRouter() {
         </Route>
 
         {/* Admin */}
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
@@ -74,7 +75,7 @@ export default function AppRouter() {
         </Route>
 
         {/* Merchant */}
-        <Route element={<ProtectedRoute allowedRoles={['merchant']} />}>
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.MERCHANT]} />}>
           <Route element={<MerchantLayout />}>
             <Route path="/merchant" element={<MerchantDashboard />} />
             <Route path="/merchant/create-order" element={<CreateOrder />} />
@@ -86,7 +87,7 @@ export default function AppRouter() {
         </Route>
 
         {/* Driver */}
-        <Route element={<ProtectedRoute allowedRoles={['driver']} />}>
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.DRIVER]} />}>
           <Route element={<DriverLayout />}>
             <Route path="/driver" element={<DriverDashboard />} />
             <Route path="/driver/deliveries" element={<AssignedDeliveries />} />

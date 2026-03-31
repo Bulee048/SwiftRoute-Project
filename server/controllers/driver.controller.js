@@ -45,11 +45,31 @@ export const getDriverById = async (req, res, next) => {
   }
 }
 
+export const getMyDriverProfile = async (req, res, next) => {
+  try {
+    const doc = await Driver.findOne({ user: req.user._id }).populate('user', 'name email role')
+    if (!doc) return ApiResponse.error(res, 'Driver profile not found', 404)
+    return ApiResponse.success(res, { driver: doc })
+  } catch (err) {
+    next(err)
+  }
+}
+
 export const updateDriver = async (req, res, next) => {
   try {
     const doc = await Driver.findByIdAndUpdate(req.params.id, req.body, { new: true })
     if (!doc) return ApiResponse.error(res, 'Driver not found', 404)
     return ApiResponse.success(res, { driver: doc }, 'Driver updated')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const updateMyDriverProfile = async (req, res, next) => {
+  try {
+    const doc = await Driver.findOneAndUpdate({ user: req.user._id }, req.body, { new: true })
+    if (!doc) return ApiResponse.error(res, 'Driver profile not found', 404)
+    return ApiResponse.success(res, { driver: doc }, 'Driver profile updated')
   } catch (err) {
     next(err)
   }

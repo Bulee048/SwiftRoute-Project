@@ -38,11 +38,36 @@ export const getMerchantById = async (req, res, next) => {
   }
 }
 
+export const getMyMerchantProfile = async (req, res, next) => {
+  try {
+    const doc = await Merchant.findOne({ user: req.user._id }).populate('user', 'name email role')
+    if (!doc) return ApiResponse.error(res, 'Merchant profile not found', 404)
+    return ApiResponse.success(res, { merchant: doc })
+  } catch (err) {
+    next(err)
+  }
+}
+
 export const updateMerchant = async (req, res, next) => {
   try {
     const doc = await Merchant.findByIdAndUpdate(req.params.id, req.body, { new: true })
     if (!doc) return ApiResponse.error(res, 'Merchant not found', 404)
     return ApiResponse.success(res, { merchant: doc }, 'Merchant updated')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const updateMyMerchantProfile = async (req, res, next) => {
+  try {
+    const doc = await Merchant.findOneAndUpdate(
+      { user: req.user._id },
+      req.body,
+      { new: true },
+    )
+
+    if (!doc) return ApiResponse.error(res, 'Merchant profile not found', 404)
+    return ApiResponse.success(res, { merchant: doc }, 'Merchant profile updated')
   } catch (err) {
     next(err)
   }

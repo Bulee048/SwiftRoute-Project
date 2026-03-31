@@ -19,3 +19,13 @@ export async function getAvailableDrivers({ page = 1, limit = 50, status = '' } 
   return res.data
 }
 
+export async function getMyDriverProfile() {
+  const res = await api.get('/drivers/me')
+  return res.data
+}
+
+export async function updateMyDriverProfile(payload) {
+  const res = await api.patch('/drivers/me', payload)
+  return res.data
+}
+

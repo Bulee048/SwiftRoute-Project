@@ -8,6 +8,7 @@ export const createMerchantValidator = [
 
 export const updateMerchantValidator = [
   body('businessName').optional().isString().trim().notEmpty(),
+  body('website').optional().isString().trim(),
   body('contractStatus').optional().isIn(['pending', 'active', 'suspended']),
 ]
 

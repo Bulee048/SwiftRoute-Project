@@ -1,4 +1,5 @@
 import { body } from 'express-validator'
+import { SHIPMENT_STATUSES } from '../constants/statuses.js'
 
 export const createShipmentValidator = [
   body('order').isMongoId(),
@@ -11,17 +12,7 @@ export const assignDriverValidator = [
 ]
 
 export const updateShipmentStatusValidator = [
-  body('status').isIn([
-    'created',
-    'assigned',
-    'picked_up',
-    'in_transit',
-    'hub_received',
-    'out_for_delivery',
-    'delivered',
-    'failed_delivery',
-    'returned',
-  ]),
+  body('status').isIn(Object.values(SHIPMENT_STATUSES)),
 ]
 
 export const updateShipmentLocationValidator = [

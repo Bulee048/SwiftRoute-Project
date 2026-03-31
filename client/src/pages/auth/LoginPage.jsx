@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import Button from '../../components/common/Button.jsx'
 import useAuthStore from '../../store/authStore'
 import { login as loginRequest } from '../../api/authAPI'
+import { ROLES } from '../../constants/roles.js'
 import Page from '../../components/common/Page.jsx'
 
 export default function LoginPage() {
@@ -22,7 +23,9 @@ export default function LoginPage() {
       setAccessToken(data.data.accessToken)
       toast.success('Logged in')
       const role = data.data.user?.role
-      navigate(role === 'admin' ? '/admin' : role === 'merchant' ? '/merchant' : role === 'driver' ? '/driver' : '/')
+      navigate(
+        role === ROLES.ADMIN ? '/admin' : role === ROLES.MERCHANT ? '/merchant' : role === ROLES.DRIVER ? '/driver' : '/',
+      )
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Login failed')
     } finally {

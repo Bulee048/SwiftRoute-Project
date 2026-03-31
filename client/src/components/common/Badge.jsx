@@ -8,13 +8,16 @@ const STATUS_CONFIG = {
   hub_received: { label: 'Hub Received', color: 'bg-brand-secondary/15 text-brand-secondary border-brand-secondary/25' },
   cancelled: { label: 'Cancelled', color: 'bg-brand-danger/15 text-brand-danger border-brand-danger/25' },
   pending: { label: 'Pending', color: 'bg-brand-warning/15 text-brand-warning border-brand-warning/25' },
+  processing: { label: 'Processing', color: 'bg-brand-primary/15 text-brand-primary border-brand-primary/25' },
+  completed: { label: 'Completed', color: 'bg-brand-accent/15 text-brand-accent border-brand-accent/25' },
+  failed: { label: 'Failed', color: 'bg-brand-danger/15 text-brand-danger border-brand-danger/25' },
+  refunded: { label: 'Refunded', color: 'bg-brand-danger/15 text-brand-danger border-brand-danger/25' },
   created: { label: 'Created', color: 'bg-slate-500/15 text-slate-300 border-slate-500/25' },
   draft: { label: 'Draft', color: 'bg-slate-500/15 text-slate-300 border-slate-500/25' },
   placed: { label: 'Placed', color: 'bg-slate-500/15 text-slate-300 border-slate-500/25' },
   confirmed: { label: 'Confirmed', color: 'bg-slate-500/15 text-slate-300 border-slate-500/25' },
   pickup_scheduled: { label: 'Pickup Scheduled', color: 'bg-brand-warning/15 text-brand-warning border-brand-warning/25' },
   in_transit_order: { label: 'In Transit', color: 'bg-brand-secondary/15 text-brand-secondary border-brand-secondary/25' },
-  failed: { label: 'Failed', color: 'bg-brand-danger/15 text-brand-danger border-brand-danger/25' },
   returned: { label: 'Returned', color: 'bg-brand-danger/15 text-brand-danger border-brand-danger/25' },
 }
 

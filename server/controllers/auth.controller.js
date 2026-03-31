@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { validationResult } from 'express-validator'
 import User from '../models/User.model.js'
+import Merchant from '../models/Merchant.model.js'
+import Driver from '../models/Driver.model.js'
 import { ApiResponse } from '../utils/ApiResponse.js'
 import { getCookieOptions } from '../utils/cookies.js'
 import { randomTokenHex, sha256Hex } from '../utils/crypto.js'
@@ -45,6 +47,33 @@ export const register = async (req, res, next) => {
       isActive: true,
     })
 
+    // Auto-provision merchant/driver profiles so their dashboards work out of the box.
+    if (user.role === 'merchant') {
+      await Merchant.findOneAndUpdate(
+        { user: user._id },
+        {
+          $setOnInsert: {
+            businessName: `${user.name}'s Business`,
+            businessType: 'ecommerce',
+            contractStatus: 'pending',
+          },
+        },
+        { upsert: true, new: true },
+      )
+    } else if (user.role === 'driver') {
+      await Driver.findOneAndUpdate(
+        { user: user._id },
+        {
+          $setOnInsert: {
+            licenseNumber: `TEMP-${Date.now()}`,
+            licenseExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            status: 'off_duty',
+          },
+        },
+        { upsert: true, new: true },
+      )
+    }
+
     const accessToken = signAccessToken({ id: user._id })
     const refreshToken = signRefreshToken({ id: user._id })
     user.refreshToken = sha256Hex(refreshToken)
@@ -75,6 +104,34 @@ export const login = async (req, res, next) => {
 
     const ok = await bcrypt.compare(password, user.password)
     if (!ok) return ApiResponse.error(res, 'Invalid credentials', 401)
+
+    // If this user role existed before we added auto-provisioning, ensure
+    // the linked profile docs exist so dashboards can work.
+    if (user.role === 'merchant') {
+      await Merchant.findOneAndUpdate(
+        { user: user._id },
+        {
+          $setOnInsert: {
+            businessName: `${user.name}'s Business`,
+            businessType: 'ecommerce',
+            contractStatus: 'pending',
+          },
+        },
+        { upsert: true, new: true },
+      )
+    } else if (user.role === 'driver') {
+      await Driver.findOneAndUpdate(
+        { user: user._id },
+        {
+          $setOnInsert: {
+            licenseNumber: `TEMP-${Date.now()}`,
+            licenseExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            status: 'off_duty',
+          },
+        },
+        { upsert: true, new: true },
+      )
+    }
 
     user.lastLogin = new Date()
     const accessToken = signAccessToken({ id: user._id })

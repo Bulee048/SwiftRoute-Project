@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import Page from '../../components/common/Page.jsx'
 import Button from '../../components/common/Button.jsx'
 import { createOrder } from '../../api/orderCreateAPI'
+import { getMyMerchantProfile } from '../../api/merchantProfileAPI'
 
 const schema = z.object({
   merchant: z.string().min(1, 'Merchant id is required'),
@@ -21,10 +22,12 @@ const schema = z.object({
 export default function CreateOrder() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [merchantId, setMerchantId] = useState('')
   const {
     register,
     handleSubmit,
     trigger,
+    setValue,
     watch,
     formState: { errors },
   } = useForm({
@@ -32,14 +35,39 @@ export default function CreateOrder() {
     defaultValues: { priority: 'standard' },
   })
 
+  useEffect(() => {
+    let mounted = true
+    async function run() {
+      try {
+        const res = await getMyMerchantProfile()
+        if (!mounted) return
+        const id = res?.data?.merchant?._id
+        if (id) {
+          setMerchantId(id)
+          // Ensure schema validation passes even when the merchant input is disabled.
+          setValue('merchant', id, { shouldValidate: true })
+        }
+      } catch {
+        // ignore; fallback to manual merchant id entry
+      }
+    }
+    run()
+    return () => {
+      mounted = false
+    }
+  }, [setValue])
+
+  const totalWeightValue = watch('totalWeight')
+  const priorityValue = watch('priority')
+
   const price = useMemo(() => {
-    const w = Number(watch('totalWeight') || 0)
-    const p = watch('priority')
+    const w = Number(totalWeightValue || 0)
+    const p = priorityValue
     const base = 300 + w * 50
     if (p === 'express') return Math.round(base * 1.4)
     if (p === 'same_day') return Math.round(base * 1.8)
     return Math.round(base)
-  }, [watch('totalWeight'), watch('priority')])
+  }, [totalWeightValue, priorityValue])
 
   const next = async () => {
     const map = {
@@ -55,7 +83,7 @@ export default function CreateOrder() {
     setLoading(true)
     try {
       const payload = {
-        merchant: values.merchant,
+        merchant: merchantId || values.merchant,
         customer: {
           name: values.customerName,
           phone: values.customerPhone,
@@ -88,7 +116,13 @@ export default function CreateOrder() {
       <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
         {step === 1 && (
           <>
-            <input {...register('merchant')} placeholder="Merchant ID" className="w-full rounded-xl border border-dark-border bg-dark-elevated/50 px-3 py-2.5" />
+            <input
+              {...register('merchant')}
+              defaultValue={merchantId || ''}
+              placeholder="Merchant ID"
+              disabled={!!merchantId}
+              className="w-full rounded-xl border border-dark-border bg-dark-elevated/50 px-3 py-2.5 disabled:opacity-70"
+            />
             {errors.merchant && <p className="text-xs text-brand-danger">{errors.merchant.message}</p>}
             <input {...register('customerName')} placeholder="Customer Name" className="w-full rounded-xl border border-dark-border bg-dark-elevated/50 px-3 py-2.5" />
             <input {...register('customerPhone')} placeholder="Customer Phone" className="w-full rounded-xl border border-dark-border bg-dark-elevated/50 px-3 py-2.5" />

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { ROLES } from '../constants/roles.js'
 
 const addressSchema = new mongoose.Schema(
   {
@@ -17,7 +18,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     phone: { type: String },
-    role: { type: String, enum: ['admin', 'merchant', 'driver', 'customer'], default: 'customer' },
+    role: { type: String, enum: Object.values(ROLES), default: ROLES.CUSTOMER },
     avatar: { type: String },
     address: addressSchema,
     isVerified: { type: Boolean, default: false },

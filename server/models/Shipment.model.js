@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { generateTrackingId } from '../utils/generateIds.js'
+import { SHIPMENT_STATUSES } from '../constants/statuses.js'
 
 const locationSchema = new mongoose.Schema(
   {
@@ -24,18 +25,8 @@ const shipmentSchema = new mongoose.Schema(
     merchant: { type: mongoose.Schema.Types.ObjectId, ref: 'Merchant', required: true, index: true },
     status: {
       type: String,
-      enum: [
-        'created',
-        'assigned',
-        'picked_up',
-        'in_transit',
-        'hub_received',
-        'out_for_delivery',
-        'delivered',
-        'failed_delivery',
-        'returned',
-      ],
-      default: 'created',
+      enum: Object.values(SHIPMENT_STATUSES),
+      default: SHIPMENT_STATUSES.CREATED,
       index: true,
     },
     origin: locationSchema,

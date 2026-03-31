@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import useAuthStore from '../store/authStore'
+import { ROLES } from '../constants/roles.js'
 
 export default function ProtectedRoute({ allowedRoles }) {
   const { isAuthenticated, user } = useAuthStore()
